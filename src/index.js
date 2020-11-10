@@ -8,7 +8,6 @@ let app = () => {
 		"https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json";
 	const getData = async () => {
 		const data = await d3.json(url);
-		console.log(data);
 		renderChart(data);
 	};
 
@@ -35,9 +34,40 @@ let app = () => {
 				data.monthlyVariance[0].year +
 					" -" +
 					data.monthlyVariance[data.monthlyVariance.length - 1].year +
-					" base temperature: " + data.baseTemperature+'&#8451;'
+					" base temperature: " +
+					data.baseTemperature +
+					"&#8451;"
 			)
 			.style("fill", "#006fbe");
+		const y = d3
+			.scaleBand()
+			.domain(d3.range(12))
+			.rangeRound([areaPadding, areaHeight - areaPadding]);
+		const yAxis = d3.axisLeft(y).tickFormat((d) => {
+			const dddd = new Date();
+			dddd.setUTCMonth(d);
+			return d3.timeFormat("%B")(dddd);
+		});
+		chart
+			.append("g")
+			.attr("class", "axis")
+			.attr("transform", "translate(" + areaPadding + ",0)")
+			.attr("id", "y-axis")
+			.call(yAxis);
+		const x = d3
+			.scaleBand()
+			.domain(d3.extent(data.monthlyVariance.year))
+			.rangeRound([areaPadding, areaWidth - areaPadding]);
+
+		const xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
+
+		chart
+			.append("g")
+			.attr("class", "axis")
+			.attr("transform", "translate(0," + (areaHeight - areaPadding) + ")")
+			.attr("id", "x-axis")
+			.call(xAxis);
+
 		/*const parseTime = d3.timeParse("%M:%S");
 		const color = d3.scaleOrdinal(d3.schemeCategory10);
 		
@@ -51,34 +81,7 @@ let app = () => {
 
 		
 
-		const x = d3
-			.scaleLinear()
-			.domain([
-				d3.min(data.map((d) => d.Year)) - 1,
-				d3.max(data.map((d) => d.Year)) + 1,
-			])
-			.rangeRound([areaPadding, areaWidth - areaPadding]);
-		const y = d3
-			.scaleLinear()
-			.domain([
-				d3.min(data.map((d) => parseTime(d.Time))),
-				d3.max(data.map((d) => parseTime(d.Time))),
-			])
-			.range([areaPadding, areaHeight - areaPadding]);
-		const xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
-		const yAxis = d3.axisLeft(y).tickFormat(formatTime);
-		chart
-			.append("g")
-			.attr("class", "axis")
-			.attr("transform", "translate(0," + (areaHeight - areaPadding) + ")")
-			.attr("id", "x-axis")
-			.call(xAxis);
-		chart
-			.append("g")
-			.attr("class", "axis")
-			.attr("transform", "translate(" + areaPadding + ",0)")
-			.attr("id", "y-axis")
-			.call(yAxis);
+		
 		
 			
 		
