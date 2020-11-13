@@ -47,3 +47,6 @@ You can build your project by forking this CodePen pen. Or you can use this CDN 
 
 https://github.com/artdor1978/FCCheatMap.git
 https://www.toptal.com/designers/htmlarrows/symbols/
+
+#10162F
+#FFF0E5
