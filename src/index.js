@@ -56,7 +56,7 @@ let app = () => {
 			.call(yAxis);
 		const x = d3
 			.scaleBand()
-			.domain(d3.extent(data.monthlyVariance.year))
+			.domain(data.monthlyVariance.map(d=>d.year))
 			.rangeRound([areaPadding, areaWidth - areaPadding]);
 
 		const xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
