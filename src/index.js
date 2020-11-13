@@ -29,6 +29,7 @@ let app = () => {
 			.attr("x", areaWidth / 2)
 			.attr("y", areaPadding + 20)
 			.attr("text-anchor", "middle")
+			.attr('id', 'description')
 			.attr("dy", "1.5em") // you can vary how far apart it shows up
 			.html(
 				data.monthlyVariance[0].year +
@@ -56,11 +57,18 @@ let app = () => {
 			.call(yAxis);
 		const x = d3
 			.scaleBand()
-			.domain(data.monthlyVariance.map(d=>d.year))
+			.domain(data.monthlyVariance.map((d) => d.year))
 			.rangeRound([areaPadding, areaWidth - areaPadding]);
-
-		const xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
-
+		const xAxis = d3
+			.axisBottom(x)
+			.tickValues(
+				d3.range(
+					data.monthlyVariance[0].year,
+					data.monthlyVariance[data.monthlyVariance.length - 1].year,
+					10
+				)
+			)
+			.tickFormat(d3.format("d"));
 		chart
 			.append("g")
 			.attr("class", "axis")
