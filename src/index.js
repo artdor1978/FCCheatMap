@@ -3,33 +3,32 @@ import * as styles from "../styles/index.css";
 
 let app = () => {
 	const chart = d3.select("body").append("svg").attr("id", "chart");
-	//const legendContainer = chart.append("g").attr("id", "legend");
 	const url =
 		"https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json";
 	const getData = async () => {
 		const data = await d3.json(url);
 		renderChart(data);
 	};
-
 	const renderChart = (data) => {
 		const areaWidth = window.innerWidth;
 		const areaHeight = window.innerHeight;
 		const areaPadding = areaHeight * 0.1;
+		const color = d3.scaleOrdinal(d3.schemeSet3);
 		chart.attr("width", areaWidth).attr("height", areaHeight);
 		chart
 			.append("text")
 			.text("Monthly Global Land-Surface Temperature")
 			.attr("x", areaWidth / 2)
-			.attr("y", areaPadding + 20)
+			.attr("y", areaPadding - 20)
 			.attr("id", "title")
 			.attr("text-anchor", "middle")
 			.style("fill", "#006fbe");
 		chart
 			.append("text")
 			.attr("x", areaWidth / 2)
-			.attr("y", areaPadding + 20)
+			.attr("y", areaPadding - 20)
 			.attr("text-anchor", "middle")
-			.attr('id', 'description')
+			.attr("id", "description")
 			.attr("dy", "1.5em") // you can vary how far apart it shows up
 			.html(
 				data.monthlyVariance[0].year +
@@ -42,7 +41,7 @@ let app = () => {
 			.style("fill", "#006fbe");
 		const y = d3
 			.scaleBand()
-			.domain(d3.range(12))
+			.domain(d3.range(1, 13))
 			.rangeRound([areaPadding, areaHeight - areaPadding]);
 		const yAxis = d3.axisLeft(y).tickFormat((d) => {
 			const dddd = new Date();
@@ -75,6 +74,17 @@ let app = () => {
 			.attr("transform", "translate(0," + (areaHeight - areaPadding) + ")")
 			.attr("id", "x-axis")
 			.call(xAxis);
+		chart
+			.selectAll("rect")
+			.data(data.monthlyVariance)
+			.enter()
+			.append("rect")
+			.attr("class", "cell")
+			.attr("x", (d, i) => x(d.year))
+			.attr("y", (d) => y(d.month))
+			.attr("width", x.bandwidth())
+			.attr("height", y.bandwidth())
+			.attr("fill", (d) => color(data.baseTemperature + d.variance));
 
 		/*const parseTime = d3.timeParse("%M:%S");
 		const color = d3.scaleOrdinal(d3.schemeCategory10);
