@@ -15,6 +15,11 @@ let app = () => {
 		const areaPadding = areaHeight * 0.1;
 		const color = d3.scaleOrdinal(d3.schemeSet3);
 		chart.attr("width", areaWidth).attr("height", areaHeight);
+		const tooltip = d3
+			.select("body")
+			.append("div")
+			.attr("id", "tooltip")
+			.style("opacity", 0);
 		chart
 			.append("text")
 			.text("Monthly Global Land-Surface Temperature")
@@ -45,7 +50,7 @@ let app = () => {
 			.rangeRound([areaPadding, areaHeight - areaPadding]);
 		const yAxis = d3.axisLeft(y).tickFormat((d) => {
 			const dddd = new Date();
-			dddd.setUTCMonth(d);
+			dddd.setUTCMonth(d - 1);
 			return d3.timeFormat("%B")(dddd);
 		});
 		chart
@@ -84,17 +89,35 @@ let app = () => {
 			.attr("y", (d) => y(d.month))
 			.attr("width", x.bandwidth())
 			.attr("height", y.bandwidth())
-			.attr("fill", (d) => color(data.baseTemperature + d.variance));
+			.attr("fill", (d) => color(data.baseTemperature + d.variance))
+			.attr("data-month", (d) => d.month - 1)
+			.attr("data-year", (d) => d.year)
+			.attr("data-temp", (d) => data.baseTemperature + d.variance)
+			.on("mouseover", (d, i) => {
+				tooltip.transition().duration(200).style("opacity", 1);
+				tooltip
+					.html(
+						i.year +
+							"<br/>" +
+							i.month +
+							"<br/>" +
+							(data.baseTemperature + i.variance).toFixed(2) +
+							" " +
+							"&#8451;"
+					)
+					.style("left", event.pageX - 25 + "px")
+					.style("top", event.pageY - 45 + "px")
+					.attr("data-year", i.year);
+			})
+			.on("mouseout", function (d) {
+				tooltip.transition().duration(500).style("opacity", 0);
+			});
 
 		/*const parseTime = d3.timeParse("%M:%S");
 		const color = d3.scaleOrdinal(d3.schemeCategory10);
 		
 		
-		const tooltip = d3
-			.select("body")
-			.append("div")
-			.attr("id", "tooltip")
-			.style("opacity", 0);
+		
 		const formatTime = d3.timeFormat("%M:%S");
 
 		

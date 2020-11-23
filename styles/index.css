@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: "Roboto", sans-serif;
-	color: #8da1c5;
+	color:#006fbe;
 	background: #f1fdea;
 }
 #title {
@@ -14,8 +14,8 @@ body {
 #tooltip {
 	position: absolute;
 	text-align: center;
-	width: 12rem;
-	height: 2.5rem;
+	width: 5rem;
+	height: 4rem;
 	padding: 0.2rem;
 	font: 1rem sans-serif;
 	background: #e1e0e0;
