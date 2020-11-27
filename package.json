@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "homepage": "https://artdor1978.github.io/FCCbarChart/",
+  "homepage": "https://artdor1978.github.io/FCCheatMap/",
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
