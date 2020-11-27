@@ -23,7 +23,7 @@ body {
 	border-radius: 0.5rem;
 	pointer-events: none;
 }
-.dot {
-  stroke: #453e37;
+.cell:hover {
+  stroke: #f0027f;
   opacity: 0.8;
 }

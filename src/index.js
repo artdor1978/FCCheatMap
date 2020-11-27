@@ -3,6 +3,7 @@ import * as styles from "../styles/index.css";
 
 let app = () => {
 	const chart = d3.select("body").append("svg").attr("id", "chart");
+	const legendContainer = chart.append("g").attr("id", "legend");
 	const url =
 		"https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json";
 	const getData = async () => {
@@ -13,8 +14,23 @@ let app = () => {
 		const areaWidth = window.innerWidth;
 		const areaHeight = window.innerHeight;
 		const areaPadding = areaHeight * 0.1;
-		const color = d3.scaleOrdinal(d3.schemeSet3);
 		chart.attr("width", areaWidth).attr("height", areaHeight);
+		const tempVariance = d3.extent(
+			data.monthlyVariance,
+			(d) => data.baseTemperature + d.variance
+		);
+		const color = d3
+			.scaleQuantize()
+			.domain(tempVariance)
+			.range([
+				"#3288bd",
+				"#99d594",
+				"#e6f598",
+				"#fee08b",
+				"#fc8d59",
+				"#d53e4f",
+			]);
+
 		const tooltip = d3
 			.select("body")
 			.append("div")
@@ -34,7 +50,7 @@ let app = () => {
 			.attr("y", areaPadding - 20)
 			.attr("text-anchor", "middle")
 			.attr("id", "description")
-			.attr("dy", "1.5em") // you can vary how far apart it shows up
+			.attr("dy", "1.5em")
 			.html(
 				data.monthlyVariance[0].year +
 					" -" +
@@ -62,7 +78,8 @@ let app = () => {
 		const x = d3
 			.scaleBand()
 			.domain(data.monthlyVariance.map((d) => d.year))
-			.rangeRound([areaPadding, areaWidth - areaPadding]);
+			.paddingOuter(0.1)
+			.range([areaPadding, areaWidth - areaPadding]);
 		const xAxis = d3
 			.axisBottom(x)
 			.tickValues(
@@ -94,12 +111,14 @@ let app = () => {
 			.attr("data-year", (d) => d.year)
 			.attr("data-temp", (d) => data.baseTemperature + d.variance)
 			.on("mouseover", (d, i) => {
+				const dm = new Date();
+				dm.setUTCMonth(i.month - 1);
 				tooltip.transition().duration(200).style("opacity", 1);
 				tooltip
 					.html(
 						i.year +
 							"<br/>" +
-							i.month +
+							d3.timeFormat("%B")(dm) +
 							"<br/>" +
 							(data.baseTemperature + i.variance).toFixed(2) +
 							" " +
@@ -112,94 +131,43 @@ let app = () => {
 			.on("mouseout", function (d) {
 				tooltip.transition().duration(500).style("opacity", 0);
 			});
-
-		/*const parseTime = d3.timeParse("%M:%S");
-		const color = d3.scaleOrdinal(d3.schemeCategory10);
-		
-		
-		
-		const formatTime = d3.timeFormat("%M:%S");
-
-		
-
-		
-		
-			
-		
-		chart
-			.selectAll("dot")
-			.data(data)
-			.enter()
-			.append("circle")
-			.attr("class", "dot")
-			.attr("cx", (d) => x(d.Year))
-			.attr("cy", (d) => y(parseTime(d.Time)))
-			.attr("data-xvalue", (d) => d.Year)
-			.attr("data-yvalue", (d) => parseTime(d.Time).toISOString())
-			.style("fill", (d) => color(d.Doping != ""))
-			.attr("r", 6)
-			.on("mouseover", (d, i) => {
-				tooltip.transition().duration(200).style("opacity", 1);
-				tooltip
-					.html(i.Name + "<br/>" + i.Nationality)
-					.style("left", event.pageX - 25 + "px")
-					.style("top", event.pageY - 45 + "px")
-					.attr("data-year", i.Year);
-			})
-			.on("mouseout", function (d) {
-				tooltip.transition().duration(500).style("opacity", 0);
-			});
-
-		pulse();
-
-		function pulse() {
-			var circles = chart.selectAll("circle");
-			(function repeat() {
-				circles = circles
-					.transition()
-					.duration(2000)
-					.attr("r", 13)
-					.transition()
-					.duration(2000)
-					.attr("r", 6)
-					.on("end", repeat);
-			})();
-		}
+		console.log(tempVariance, color.range().length);
+		console.log(d3.range(tempVariance[0], tempVariance[1], color.length));
 		const legend = legendContainer
 			.selectAll("#legend")
-			.data(color.domain())
+			.data(color.range())
 			.enter()
 			.append("g")
 			.attr("class", "legend-label")
 			.attr("transform", function (d, i) {
-				return "translate(0," + (areaHeight / 2 - i * 20) + ")";
+				return "translate(0," + (areaHeight - areaPadding / 1.5) + ")";
 			});
 		legend
 			.append("rect")
-			.attr("x", areaWidth - areaPadding - 25)
-			.attr("width", 18)
-			.attr("height", 18)
-			.style("fill", color);
-
-		legend
+			.attr("x", (d, i) => areaPadding + i * 40 + 20)
+			.attr("width", 40)
+			.attr("height", 20)
+			.style("fill", (d) => d);
+		legendContainer
+			.selectAll("text")
+			.data(
+				d3.range(
+					tempVariance[0],
+					tempVariance[1],
+					(tempVariance[1] - tempVariance[0]) / color.range().length
+				)
+			)
+			.enter()
 			.append("text")
-			.attr("x", areaWidth - areaPadding - 28)
-			.attr("y", 9)
-			.attr("dy", ".35em")
-			.style("text-anchor", "end")
-			.text(function (d) {
-				if (d) {
-					return "Riders with doping allegations";
-				} else {
-					return "No doping allegations";
-				}
+			.text((d) => d.toFixed(2))
+			.attr("transform", function (d, i) {
+				return "translate(0," + (areaHeight - areaPadding / 1.5 + 30) + ")";
 			})
-			.style("fill", "#163d57");*/
+			.attr("x", (d, i) => areaPadding + i * 40 + 20)
+			.style("fill", "#006fbe");
 	};
-
 	return getData();
 };
 
-// добавляем заголовок в DOM
 const root = document.querySelector("#root");
 root.appendChild(app());
